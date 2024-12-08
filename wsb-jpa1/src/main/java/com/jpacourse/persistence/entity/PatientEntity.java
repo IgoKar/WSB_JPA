@@ -39,7 +39,7 @@ public class PatientEntity {
 	@JoinColumn(name = "address_id", nullable = false)
 	private AddressEntity address;
 
-	@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<VisitEntity> visits;
 
 }

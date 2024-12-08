@@ -31,7 +31,6 @@ public class VisitEntity {
 	@JoinColumn(name = "doctor_id", nullable = false)
 	private DoctorEntity doctor;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "visit_id")
+	@OneToMany(mappedBy = "visit", cascade = CascadeType.ALL)
 	private List<MedicalTreatmentEntity> treatments;
 }
