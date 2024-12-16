@@ -44,5 +44,4 @@ public class PatientEntity {
 
 	@OneToMany(mappedBy = "patient", cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<VisitEntity> visits;
-
 }
