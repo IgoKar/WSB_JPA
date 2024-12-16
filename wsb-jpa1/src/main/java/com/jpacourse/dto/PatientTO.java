@@ -1,5 +1,6 @@
 package com.jpacourse.dto;
 
+import com.jpacourse.persistence.enums.TreatmentType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,23 +10,15 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PatientDto {
+public class PatientTO {
     private Long id;
     private String firstName;
     private String lastName;
     private String telephoneNumber;
     private String email;
     private String patientNumber;
-    private LocalDate dateOfBirth;
     private Boolean isInsured;
+    private LocalDate dateOfBirth;
 
-    private List<VisitDto> visits;
-
-    @Getter
-    @Setter
-    public static class VisitDto {
-        private LocalDateTime visitTime;
-        private String doctorName;
-        private List<String> treatmentTypes;
-    }
+    private List<VisitTO> visits;
 }
