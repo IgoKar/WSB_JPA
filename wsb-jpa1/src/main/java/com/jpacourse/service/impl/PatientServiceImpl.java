@@ -1,6 +1,6 @@
 package com.jpacourse.service.impl;
 
-import com.jpacourse.dto.PatientDto;
+import com.jpacourse.dto.PatientTO;
 import com.jpacourse.mapper.PatientMapper;
 import com.jpacourse.repository.PatientRepository;
 import com.jpacourse.service.PatientService;
@@ -17,7 +17,7 @@ public class PatientServiceImpl implements PatientService {
     @Autowired
     private PatientMapper patientMapper;
 
-    public Optional<PatientDto> getPatientById(Long id) {
-        return patientRepository.findById(id).map(patientMapper::toDto);
+    public Optional<PatientTO> getPatientById(Long id) {
+        return patientRepository.findById(id).map(patientMapper::toTo);
     }
 }
