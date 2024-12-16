@@ -32,12 +32,14 @@ public class DoctorEntity {
 	@Column(name ="doctor_number", nullable = false)
 	private String doctorNumber;
 
+	@OneToOne
+	@JoinColumn(name = "address_id", nullable = false)
+	private AddressEntity address;
+
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Specialization specialization;
 
 	@OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
 	private List<VisitEntity> visits;
-
-
 }

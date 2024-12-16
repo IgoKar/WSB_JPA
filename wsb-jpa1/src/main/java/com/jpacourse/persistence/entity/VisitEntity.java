@@ -20,7 +20,6 @@ public class VisitEntity {
 
 	private String description;
 
-	@Column(nullable = false)
 	private LocalDateTime time;
 
 	@ManyToOne

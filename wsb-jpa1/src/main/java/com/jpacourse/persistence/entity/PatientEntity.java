@@ -32,6 +32,9 @@ public class PatientEntity {
 	@Column(name = "patient_number", nullable = false)
 	private String patientNumber;
 
+	@Column(name = "is_insured", nullable = false)
+	private Boolean isInsured;
+
 	@Column(name = "date_of_birth",nullable = false)
 	private LocalDate dateOfBirth;
 
@@ -39,7 +42,7 @@ public class PatientEntity {
 	@JoinColumn(name = "address_id", nullable = false)
 	private AddressEntity address;
 
-	@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "patient", cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<VisitEntity> visits;
 
 }
