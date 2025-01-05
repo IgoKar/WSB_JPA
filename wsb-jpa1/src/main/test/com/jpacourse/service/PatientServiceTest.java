@@ -8,12 +8,9 @@ import com.jpacourse.repository.AddressRepository;
 import com.jpacourse.repository.DoctorRepository;
 import com.jpacourse.repository.PatientRepository;
 import com.jpacourse.repository.VisitRepository;
-import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jpacourse.persistence.enums.Specialization;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +22,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class PatientServiceTest {
 
