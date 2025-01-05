@@ -4,15 +4,14 @@ import com.jpacourse.persistence.entity.AddressEntity;
 import com.jpacourse.persistence.entity.DoctorEntity;
 import com.jpacourse.persistence.entity.PatientEntity;
 import com.jpacourse.persistence.entity.VisitEntity;
-import com.jpacourse.repository.AddressRepository;
-import com.jpacourse.repository.DoctorRepository;
-import com.jpacourse.repository.PatientRepository;
-import com.jpacourse.repository.VisitRepository;
+import com.jpacourse.persistence.dao.AddressDao;
+import com.jpacourse.persistence.dao.PatientDao;
+import com.jpacourse.persistence.dao.VisitDao;
+import com.jpacourse.persistence.dao.DoctorDao;
+import com.jpacourse.persistence.enums.Specialization;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import com.jpacourse.persistence.enums.Specialization;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -26,29 +25,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PatientServiceTest {
 
     @Autowired
-    private PatientRepository patientRepository;
+    private PatientDao patientDao;
     @Autowired
-    private DoctorRepository doctorRepository;
+    private DoctorDao doctorDao;
     @Autowired
-    private VisitRepository visitRepository;
+    private VisitDao visitDao;
     @Autowired
-    private AddressRepository addressRepository;
-
+    private AddressDao addressDao;
 
     @Test
+    @Transactional
     public void shouldRemoveVisitWhenPatientRemoved() {
         VisitEntity savedVisit = createTestVisit();
         Long visitId = savedVisit.getId();
         Long patientId = savedVisit.getPatient().getId();
 
-        patientRepository.delete(savedVisit.getPatient());
+        patientDao.delete(savedVisit.getPatient());
 
-        Optional<PatientEntity> patientEntity = patientRepository.findById(patientId);
-        assertTrue(patientEntity.isEmpty(), "Patient is removed");
+        Optional<PatientEntity> patientEntity = Optional.ofNullable(patientDao.findOne(patientId));
+        assertTrue(patientEntity.isEmpty(), "Patient should be removed from the database");
 
-        Optional<VisitEntity> visitEntity = visitRepository.findById(visitId);
-        assertTrue(visitEntity.isEmpty(), "Visit is removed");
-
+        Optional<VisitEntity> visitEntity = Optional.ofNullable(visitDao.findOne(visitId));
+        assertTrue(visitEntity.isEmpty(), "Visit should be removed when the patient is deleted");
     }
 
     @Transactional
@@ -59,7 +57,7 @@ public class PatientServiceTest {
         address.setAddressLine1("Testowa 2");
         address.setAddressLine2("B");
 
-        AddressEntity savedAddress = addressRepository.save(address);
+        AddressEntity savedAddress = addressDao.save(address);
 
         AddressEntity address2 = new AddressEntity();
         address2.setCity("Wroclaw");
@@ -67,7 +65,7 @@ public class PatientServiceTest {
         address2.setAddressLine1("Testowa 2");
         address2.setAddressLine2("B");
 
-        AddressEntity savedAddress2 = addressRepository.save(address2);
+        AddressEntity savedAddress2 = addressDao.save(address2);
 
         PatientEntity patient = new PatientEntity();
         patient.setFirstName("Igor");
@@ -79,7 +77,7 @@ public class PatientServiceTest {
         patient.setAddress(savedAddress);
         patient.setVisits(new ArrayList<>());
 
-        PatientEntity savedPatient = patientRepository.save(patient);
+        PatientEntity savedPatient = patientDao.save(patient);
 
         DoctorEntity doctor = new DoctorEntity();
         doctor.setFirstName("Anna");
@@ -90,19 +88,18 @@ public class PatientServiceTest {
         doctor.setAddress(savedAddress2);
         doctor.setSpecialization(Specialization.OCULIST);
 
-        DoctorEntity savedDoctor = doctorRepository.save(doctor);
+        DoctorEntity savedDoctor = doctorDao.save(doctor);
 
         VisitEntity visit = new VisitEntity();
         visit.setDescription("Routine Checkup");
         visit.setTime(LocalDateTime.now());
-        visit.setPatient(patient);
+        visit.setPatient(savedPatient);
         visit.setDoctor(savedDoctor);
 
         savedPatient.getVisits().add(visit);
 
-        visitRepository.save(visit);
+        visitDao.save(visit);
 
         return visit;
     }
-
 }

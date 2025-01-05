@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.*;
@@ -43,5 +44,5 @@ public class PatientEntity {
 	private AddressEntity address;
 
 	@OneToMany(mappedBy = "patient", cascade = CascadeType.PERSIST, orphanRemoval = true)
-	private List<VisitEntity> visits;
+	private List<VisitEntity> visits = new ArrayList<>();;
 }

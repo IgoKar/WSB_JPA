@@ -6,14 +6,13 @@ import com.jpacourse.mapper.AddressMapper;
 import com.jpacourse.mapper.PatientMapper;
 import com.jpacourse.persistence.entity.AddressEntity;
 import com.jpacourse.persistence.entity.PatientEntity;
-import com.jpacourse.repository.AddressRepository;
-import com.jpacourse.repository.PatientRepository;
+import com.jpacourse.persistence.dao.AddressDao;
+import com.jpacourse.persistence.dao.PatientDao;
 import com.jpacourse.service.impl.PatientServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -24,16 +23,16 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @SpringBootTest
-class PatientServiceTest {
+class PatientControllerTest {
 
     @Autowired
     private AddressMapper addressMapper;
 
     @Mock
-    private AddressRepository addressRepository;
+    private AddressDao addressDao;
 
     @Mock
-    private PatientRepository patientRepository;
+    private PatientDao patientDao;
 
     @Mock
     private PatientMapper patientMapper;
@@ -114,14 +113,14 @@ class PatientServiceTest {
     @Test
     void shouldCreatePatientWithExistingAddress() {
         // Given: Address already exists in the database
-        when(addressRepository.findByCityAndAddressLine1AndPostalCode(
+        when(addressDao.findByCityAndAddressLine1AndPostalCode(
                 existingAddress.getCity(),
                 existingAddress.getAddressLine1(),
                 existingAddress.getPostalCode()
         )).thenReturn(Optional.of(existingAddress));
 
         when(patientMapper.toEntity(patientTOWithExistingAddress)).thenReturn(patientEntityWithExistingAddress);
-        when(patientRepository.save(patientEntityWithExistingAddress)).thenReturn(patientEntityWithExistingAddress);
+        when(patientDao.save(patientEntityWithExistingAddress)).thenReturn(patientEntityWithExistingAddress); // Zmieniono na patientDao
         when(patientMapper.toTo(patientEntityWithExistingAddress)).thenReturn(patientTOWithExistingAddress);
 
         // When: Creating patient with existing address
@@ -131,21 +130,21 @@ class PatientServiceTest {
         assertNotNull(result);
         assertEquals("John", result.getFirstName());
         assertEquals("Doe", result.getLastName());
-        assertEquals(existingAddressTO, result.getAddress());  // Address should be the same as the existing one
+        assertEquals(existingAddressTO, result.getAddress());
     }
 
     @Test
     void shouldCreatePatientWithNewAddress() {
         // Given: Address does not exist in the database
-        when(addressRepository.findByCityAndAddressLine1AndPostalCode(
+        when(addressDao.findByCityAndAddressLine1AndPostalCode(
                 newAddress.getCity(),
                 newAddress.getAddressLine1(),
                 newAddress.getPostalCode()
-        )).thenReturn(Optional.empty());  // No such address, so it should be created
+        )).thenReturn(Optional.empty());
 
-        when(addressRepository.save(newAddress)).thenReturn(newAddress);
+        when(addressDao.save(newAddress)).thenReturn(newAddress); // Zmieniono na addressDao
         when(patientMapper.toEntity(patientTOWithNewAddress)).thenReturn(patientEntityWithNewAddress);
-        when(patientRepository.save(patientEntityWithNewAddress)).thenReturn(patientEntityWithNewAddress);
+        when(patientDao.save(patientEntityWithNewAddress)).thenReturn(patientEntityWithNewAddress); // Zmieniono na patientDao
         when(patientMapper.toTo(patientEntityWithNewAddress)).thenReturn(patientTOWithNewAddress);
 
         // When: Creating patient with new address
@@ -155,6 +154,6 @@ class PatientServiceTest {
         assertNotNull(result);
         assertEquals("Jane", result.getFirstName());
         assertEquals("Smith", result.getLastName());
-        assertEquals(newAddressTO, result.getAddress());  // The new address should be assigned
+        assertEquals(newAddressTO, result.getAddress());
     }
 }

@@ -1,15 +1,14 @@
 package com.jpacourse.persistance.dao;
 
+import com.jpacourse.persistence.dao.AddressDao;
+import com.jpacourse.persistence.dao.DoctorDao;
 import com.jpacourse.persistence.dao.PatientDao;
+import com.jpacourse.persistence.dao.VisitDao;
 import com.jpacourse.persistence.entity.AddressEntity;
 import com.jpacourse.persistence.entity.DoctorEntity;
 import com.jpacourse.persistence.entity.PatientEntity;
 import com.jpacourse.persistence.entity.VisitEntity;
 import com.jpacourse.persistence.enums.Specialization;
-import com.jpacourse.repository.AddressRepository;
-import com.jpacourse.repository.DoctorRepository;
-import com.jpacourse.repository.PatientRepository;
-import com.jpacourse.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,32 +25,28 @@ public class PatientDaoTest {
     @Autowired
     private PatientDao patientDao;
     @Autowired
-    private PatientRepository patientRepository;
+    private DoctorDao doctorDao;
     @Autowired
-    private DoctorRepository doctorRepository;
+    private VisitDao visitDao;
     @Autowired
-    private VisitRepository visitRepository;
-    @Autowired
-    private AddressRepository addressRepository;
+    private AddressDao addressDao;
 
     @Test
     @Transactional
     public void shouldAddVisitToPatient() {
-        AddressEntity address = new AddressEntity();
-        address.setCity("Wroclaw");
-        address.setPostalCode("50-001");
-        address.setAddressLine1("Testowa 2");
-        address.setAddressLine2("B");
+        AddressEntity patientAddress = new AddressEntity();
+        patientAddress.setCity("Wroclaw");
+        patientAddress.setPostalCode("50-001");
+        patientAddress.setAddressLine1("Testowa 2");
+        patientAddress.setAddressLine2("B");
+        addressDao.save(patientAddress);
 
-        AddressEntity savedAddress = addressRepository.save(address);
-
-        AddressEntity address2 = new AddressEntity();
-        address2.setCity("Wroclaw");
-        address2.setPostalCode("50-001");
-        address2.setAddressLine1("Testowa 2");
-        address2.setAddressLine2("B");
-
-        AddressEntity savedAddress2 = addressRepository.save(address2);
+        AddressEntity doctorAddress = new AddressEntity();
+        doctorAddress.setCity("Wroclaw");
+        doctorAddress.setPostalCode("50-001");
+        doctorAddress.setAddressLine1("Testowa 3");
+        doctorAddress.setAddressLine2("C");
+        addressDao.save(doctorAddress);
 
         PatientEntity patient = new PatientEntity();
         patient.setFirstName("Igor");
@@ -61,10 +55,8 @@ public class PatientDaoTest {
         patient.setPatientNumber("1");
         patient.setIsInsured(false);
         patient.setDateOfBirth(LocalDate.of(2000, 6, 29));
-        patient.setAddress(savedAddress);
-        patient.setVisits(new ArrayList<>());
-
-        PatientEntity savedPatient = patientRepository.save(patient);
+        patient.setAddress(patientAddress);
+        patientDao.save(patient);
 
         DoctorEntity doctor = new DoctorEntity();
         doctor.setFirstName("Anna");
@@ -72,28 +64,25 @@ public class PatientDaoTest {
         doctor.setTelephoneNumber("987654321");
         doctor.setEmail("anna.smith@doctor.com");
         doctor.setDoctorNumber("D12345");
-        doctor.setAddress(savedAddress2);
+        doctor.setAddress(doctorAddress);
         doctor.setSpecialization(Specialization.OCULIST);
-
-        DoctorEntity savedDoctor = doctorRepository.save(doctor);
+        doctorDao.save(doctor);
 
         LocalDateTime visitDate = LocalDateTime.now().plusDays(2);
         String description = "Routine Checkup";
-        patientDao.addVisitToPatient(savedPatient.getId(), savedDoctor.getId(), visitDate, description);
+        patientDao.addVisitToPatient(patient.getId(), doctor.getId(), visitDate, description);
 
-        PatientEntity updatedPatient = patientRepository.findById(savedPatient.getId()).orElse(null);
-
+        PatientEntity updatedPatient = patientDao.findOne(patient.getId());
         assertThat(updatedPatient).isNotNull();
         assertThat(updatedPatient.getVisits()).hasSize(1);
 
-        VisitEntity visit = savedPatient.getVisits().get(0);
-
+        VisitEntity visit = updatedPatient.getVisits().get(0);
         assertThat(visit.getTime()).isEqualTo(visitDate);
         assertThat(visit.getDescription()).isEqualTo(description);
-        assertThat(visit.getPatient().getId()).isEqualTo(updatedPatient.getId());
-        assertThat(visit.getDoctor().getId()).isEqualTo(savedDoctor.getId());
+        assertThat(visit.getPatient().getId()).isEqualTo(patient.getId());
+        assertThat(visit.getDoctor().getId()).isEqualTo(doctor.getId());
 
-        VisitEntity savedVisit = visitRepository.findById(visit.getId()).orElse(null);
+        VisitEntity savedVisit = visitDao.findOne(visit.getId());
         assertThat(savedVisit).isNotNull();
         assertThat(savedVisit.getDescription()).isEqualTo(description);
     }
