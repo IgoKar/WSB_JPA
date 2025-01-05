@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public class AddressDaoImpl extends AbstractDao<AddressEntity, Long> implements AddressDao
 {
+    @Override
     public Optional<AddressEntity> findByCityAndAddressLine1AndPostalCode(String city, String addressLine1, String postalCode) {
         TypedQuery<AddressEntity> query = entityManager.createQuery(
                 "SELECT a FROM AddressEntity a WHERE a.city = :city AND a.addressLine1 = :addressLine1 AND a.postalCode = :postalCode",
