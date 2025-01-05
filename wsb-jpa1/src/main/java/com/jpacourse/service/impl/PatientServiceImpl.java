@@ -2,10 +2,10 @@ package com.jpacourse.service.impl;
 
 import com.jpacourse.dto.PatientTO;
 import com.jpacourse.mapper.PatientMapper;
+import com.jpacourse.persistence.dao.AddressDao;
+import com.jpacourse.persistence.dao.PatientDao;
 import com.jpacourse.persistence.entity.AddressEntity;
 import com.jpacourse.persistence.entity.PatientEntity;
-import com.jpacourse.repository.AddressRepository;
-import com.jpacourse.repository.PatientRepository;
 import com.jpacourse.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,19 +16,21 @@ import java.util.Optional;
 public class PatientServiceImpl implements PatientService {
 
     @Autowired
-    private AddressRepository addressRepository;
+    private AddressDao addressDao;
     @Autowired
-    private PatientRepository patientRepository;
+    private PatientDao patientDao;
     @Autowired
     private PatientMapper patientMapper;
 
+    @Override
     public Optional<PatientTO> getPatientById(Long id) {
-        return patientRepository.findById(id).map(patientMapper::toTo);
+        return Optional.ofNullable(patientDao.findOne(id))
+                .map(patientMapper::toTo);
     }
 
     @Override
     public PatientTO createPatient(PatientTO patientTO) {
-        AddressEntity addressEntity = addressRepository.findByCityAndAddressLine1AndPostalCode(
+        AddressEntity addressEntity = addressDao.findByCityAndAddressLine1AndPostalCode(
                 patientTO.getAddress().getCity(),
                 patientTO.getAddress().getAddressLine1(),
                 patientTO.getAddress().getPostalCode()
@@ -38,20 +40,21 @@ public class PatientServiceImpl implements PatientService {
             newAddress.setAddressLine1(patientTO.getAddress().getAddressLine1());
             newAddress.setAddressLine2(patientTO.getAddress().getAddressLine2());
             newAddress.setPostalCode(patientTO.getAddress().getPostalCode());
-            return addressRepository.save(newAddress);
+            return addressDao.save(newAddress);
         });
 
         PatientEntity patientEntity = patientMapper.toEntity(patientTO);
         patientEntity.setAddress(addressEntity);
 
-        PatientEntity savedEntity = patientRepository.save(patientEntity);
+        PatientEntity savedEntity = patientDao.save(patientEntity);
 
         return patientMapper.toTo(savedEntity);
     }
 
     @Override
     public Optional<PatientTO> updatePatient(Long id, PatientTO patientTO) {
-        return patientRepository.findById(id).map(existingEntity -> {
+        PatientEntity existingEntity = patientDao.findOne(id);
+        if (existingEntity != null) {
             existingEntity.setFirstName(patientTO.getFirstName());
             existingEntity.setLastName(patientTO.getLastName());
             existingEntity.setTelephoneNumber(patientTO.getTelephoneNumber());
@@ -60,16 +63,17 @@ public class PatientServiceImpl implements PatientService {
             existingEntity.setDateOfBirth(patientTO.getDateOfBirth());
             existingEntity.setIsInsured(patientTO.getIsInsured());
 
-            PatientEntity updatedEntity = patientRepository.save(existingEntity);
+            PatientEntity updatedEntity = patientDao.save(existingEntity);
 
-            return patientMapper.toTo(updatedEntity);
-        });
+            return Optional.of(patientMapper.toTo(updatedEntity));
+        }
+        return Optional.empty();
     }
 
     @Override
     public boolean deletePatient(Long id) {
-        if (patientRepository.existsById(id)) {
-            patientRepository.deleteById(id);
+        if (patientDao.exists(id)) {
+            patientDao.delete(id);
             return true;
         }
         return false;

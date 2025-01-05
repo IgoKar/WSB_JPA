@@ -1,4 +1,4 @@
-package com.jpacourse.controller;
+package com.jpacourse.rest;
 
 import com.jpacourse.dto.PatientTO;
 import com.jpacourse.service.PatientService;
@@ -13,8 +13,11 @@ import java.util.Optional;
 @RequestMapping("/api/patients")
 public class PatientController {
 
-    @Autowired
-    private PatientService patientService;
+    private final PatientService patientService;
+
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<PatientTO> getPatientById(@PathVariable Long id) {
