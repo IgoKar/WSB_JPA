@@ -1,6 +1,5 @@
 package com.jpacourse.persistence.entity;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.jpacourse.persistence.enums.Specialization;
 import lombok.Getter;
 import lombok.Setter;
