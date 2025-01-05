@@ -1,6 +1,6 @@
 INSERT INTO address (city, address_line1, address_line2, postal_code)
 VALUES
-    ('Warszawa', 'ul. Długa 1', 'Mieszkanie 5', '00-001'),
+    ('Warszawa', 'ul. Długa 1', 'Mieszkanie 5', '62-030'),
     ('Kraków', 'ul. Krakowska 2', 'Piętro 2', '31-002');
 
 INSERT INTO doctor (firstname, lastname, telephone_number, email, doctor_number, specialization, address_id)

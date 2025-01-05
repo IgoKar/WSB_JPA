@@ -2,13 +2,11 @@ package com.jpacourse.mapper;
 
 import com.jpacourse.dto.AddressTO;
 import com.jpacourse.persistence.entity.AddressEntity;
-import org.springframework.stereotype.Component;
 
-@Component
 public class AddressMapper
 {
 
-    public AddressTO toTO(final AddressEntity addressEntity)
+    public static AddressTO toTO(final AddressEntity addressEntity)
     {
         if (addressEntity == null)
         {
@@ -23,7 +21,7 @@ public class AddressMapper
         return addressTO;
     }
 
-    public AddressEntity toEntity(final AddressTO addressTO)
+    public static AddressEntity toEntity(final AddressTO addressTO)
     {
         if(addressTO == null)
         {

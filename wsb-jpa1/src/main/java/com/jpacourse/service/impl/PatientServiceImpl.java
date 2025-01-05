@@ -19,13 +19,11 @@ public class PatientServiceImpl implements PatientService {
     private AddressDao addressDao;
     @Autowired
     private PatientDao patientDao;
-    @Autowired
-    private PatientMapper patientMapper;
 
     @Override
     public Optional<PatientTO> getPatientById(Long id) {
         return Optional.ofNullable(patientDao.findOne(id))
-                .map(patientMapper::toTo);
+                .map(PatientMapper::toTo);
     }
 
     @Override
@@ -43,12 +41,12 @@ public class PatientServiceImpl implements PatientService {
             return addressDao.save(newAddress);
         });
 
-        PatientEntity patientEntity = patientMapper.toEntity(patientTO);
+        PatientEntity patientEntity = PatientMapper.toEntity(patientTO);
         patientEntity.setAddress(addressEntity);
 
         PatientEntity savedEntity = patientDao.save(patientEntity);
 
-        return patientMapper.toTo(savedEntity);
+        return PatientMapper.toTo(savedEntity);
     }
 
     @Override
@@ -65,7 +63,7 @@ public class PatientServiceImpl implements PatientService {
 
             PatientEntity updatedEntity = patientDao.save(existingEntity);
 
-            return Optional.of(patientMapper.toTo(updatedEntity));
+            return Optional.of(PatientMapper.toTo(updatedEntity));
         }
         return Optional.empty();
     }

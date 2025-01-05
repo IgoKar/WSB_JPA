@@ -31,8 +31,6 @@ public class PatientDaoImpl extends AbstractDao<PatientEntity, Long> implements 
         visit.setPatient(patient);
         visit.setDoctor(doctor);
 
-        entityManager.persist(visit);
-
         patient.getVisits().add(visit);
 
         update(patient);
