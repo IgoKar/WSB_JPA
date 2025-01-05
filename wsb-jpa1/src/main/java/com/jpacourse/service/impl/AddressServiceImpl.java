@@ -14,17 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AddressServiceImpl implements AddressService
 {
-    private final AddressDao addressDao;
-
     @Autowired
-    public AddressServiceImpl(AddressDao pAddressDao)
-    {
-        addressDao = pAddressDao;
-    }
+    private AddressDao addressDao;
+    @Autowired
+    private AddressMapper addressMapper;
 
     @Override
     public AddressTO findById(Long id) {
         final AddressEntity entity = addressDao.findOne(id);
-        return AddressMapper.mapToTO(entity);
+        return addressMapper.toTO(entity);
     }
 }
