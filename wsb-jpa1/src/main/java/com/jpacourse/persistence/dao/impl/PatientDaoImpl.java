@@ -4,8 +4,6 @@ import com.jpacourse.persistence.dao.PatientDao;
 import com.jpacourse.persistence.entity.DoctorEntity;
 import com.jpacourse.persistence.entity.PatientEntity;
 import com.jpacourse.persistence.entity.VisitEntity;
-import com.jpacourse.repository.VisitRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +16,13 @@ public class PatientDaoImpl extends AbstractDao<PatientEntity, Long> implements 
 
     @PersistenceContext
     private EntityManager entityManager;
-    @Autowired
-    private VisitRepository visitRepository;
 
     @Override
     @Transactional
     public void addVisitToPatient(Long patientId, Long doctorId, LocalDateTime visitTime, String description) {
+
         PatientEntity patient = findOne(patientId);
+
         DoctorEntity doctor = entityManager.find(DoctorEntity.class, doctorId);
 
         VisitEntity visit = new VisitEntity();
@@ -33,7 +31,7 @@ public class PatientDaoImpl extends AbstractDao<PatientEntity, Long> implements 
         visit.setPatient(patient);
         visit.setDoctor(doctor);
 
-        visitRepository.save(visit);
+        entityManager.persist(visit);
 
         patient.getVisits().add(visit);
 
