@@ -16,12 +16,10 @@ public class AddressServiceImpl implements AddressService
 {
     @Autowired
     private AddressDao addressDao;
-    @Autowired
-    private AddressMapper addressMapper;
 
     @Override
     public AddressTO findById(Long id) {
         final AddressEntity entity = addressDao.findOne(id);
-        return addressMapper.toTO(entity);
+        return AddressMapper.toTO(entity);
     }
 }

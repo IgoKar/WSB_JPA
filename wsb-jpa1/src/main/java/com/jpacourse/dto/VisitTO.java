@@ -12,5 +12,6 @@ import java.util.List;
 public class VisitTO {
     private LocalDateTime visitTime;
     private String doctorName;
+    private String description;
     private List<TreatmentType> treatmentTypes;
 }
