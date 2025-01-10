@@ -14,9 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +37,9 @@ public class PatientDaoTest {
     private VisitDao visitDao;
     @Autowired
     private AddressDao addressDao;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     @Transactional
@@ -216,5 +225,77 @@ public class PatientDaoTest {
 
         assertThat(patients).hasSize(1);
         assertThat(patients.get(0).getLastName()).isEqualTo("Smith");
+    }
+
+    @Test
+    @Transactional
+    public void shouldThrowOptimisticLockExceptionOnConcurrentModification() throws InterruptedException {
+        final Logger logger = LoggerFactory.getLogger(PatientDaoTest.class);
+
+        AddressEntity address = new AddressEntity();
+        address.setCity("Wroclaw");
+        address.setPostalCode("50-001");
+        address.setAddressLine1("Zmigrodzka 32");
+        address.setAddressLine2("B");
+
+        entityManager.persist(address);
+
+        PatientEntity patient = new PatientEntity();
+        patient.setFirstName("Igor");
+        patient.setLastName("Karlik");
+        patient.setTelephoneNumber("123-123-123");
+        patient.setPatientNumber("1");
+        patient.setIsInsured(false);
+        patient.setDateOfBirth(LocalDate.of(2000, 6, 29));
+        patient.setAddress(address);
+
+        entityManager.persist(patient);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Runnable task1 = () -> {
+            try{
+                entityManager.getTransaction().begin();
+                PatientEntity patient1 = entityManager.find(PatientEntity.class, patient.getId());
+                logger.info("Thread 1 version: " + patient1.getVersion());
+                patient1.setFirstName("Igor");
+                entityManager.merge(patient1);
+                entityManager.flush();
+                entityManager.getTransaction().commit();
+                logger.info("Thread 1 updated version: " + patient1.getVersion());
+            } catch (Exception e) {
+                entityManager.getTransaction().rollback();
+                logger.error("Thread 1 exception:", e);
+            }
+        };
+
+        Runnable task2 = () -> {
+            try{
+                entityManager.getTransaction().begin();
+                PatientEntity patient2 = entityManager.find(PatientEntity.class, patient.getId());
+                logger.info("Thread 2 version: " + patient2.getVersion());
+                patient2.setFirstName("Igor");
+                entityManager.merge(patient2);
+                entityManager.flush();
+                entityManager.getTransaction().commit();
+                logger.info("Thread 2 updated version: " + patient2.getVersion());
+            } catch (OptimisticLockException e) {
+                entityManager.getTransaction().rollback();
+                logger.error("Thread 2 OptimisticLockException", e);
+            } catch (Exception e) {
+                entityManager.getTransaction().rollback();
+                logger.error("Thread 2 exception:", e);
+            }
+        };
+
+        Thread thread1 = new Thread(task1);
+        Thread thread2 = new Thread(task2);
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
     }
 }

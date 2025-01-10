@@ -44,5 +44,8 @@ public class PatientEntity {
 	private AddressEntity address;
 
 	@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<VisitEntity> visits = new ArrayList<>();;
+	private List<VisitEntity> visits = new ArrayList<>();
+
+	@Version
+	private Long version;
 }
